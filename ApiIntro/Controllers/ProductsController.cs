@@ -1,5 +1,7 @@
 ﻿using ApiIntro.Application.Products.Reponses;
+using ApiIntro.Application.Products.RequestHandlers;
 using ApiIntro.Application.Products.Requests;
+using ApiIntro.Domain.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,20 +11,43 @@ namespace ApiIntro.Controllers
   [ApiController]
   public class ProductsController : ControllerBase
   {
+    private readonly ProductCreateRequestHandler productCreateRequestHandler;
+    private readonly ProductGetByIdRequestHandler productGetByIdRequestHandler;
+    private readonly IProductRepository productRepository;
+
+    public ProductsController(ProductCreateRequestHandler productCreateRequestHandler, ProductGetByIdRequestHandler productGetByIdRequestHandler, IProductRepository productRepository)
+    {
+      this.productCreateRequestHandler = productCreateRequestHandler;
+      this.productGetByIdRequestHandler = productGetByIdRequestHandler;
+      this.productRepository = productRepository; 
+    }
+
     // GET status Code 200
 
     // GET: api/v1/Products -> Get all products
+    // Not: eğer dbden çekilecek olan veriler üzerinde herhangi bir logic yoksa, bu yöntem veri çekmek için praktiktir. Ancak, daha karmaşık işlemler için servis katmanı ve application uygulama katmanı veya sorgu işleyicileri kullanmak daha uygun olabilir.
     [HttpGet]
     public IActionResult Get()
     {
-      return Ok(new List<ProductDetailResponse>());
+      var response = this.productRepository.findAll().Select(p=> new ProductDetailResponse 
+      { 
+        Id= p.Id,
+        Name= p.Name,
+        Price= p.Price,
+        Stock= p.Stock
+      }).ToList();
+
+      return Ok(response);
     }
 
     [HttpGet("{id}")]
     // GET: api/v1/Products/{id} -> Get product by id
     public IActionResult GetById(int id)
     {
-      return Ok(new ProductDetailResponse());
+      // diğer örnek ise application katmanında çağırmaktır.
+      var response = productGetByIdRequestHandler.Handle(id);
+
+      return Ok(response);
     }
 
     // Status Code 201
@@ -30,8 +55,11 @@ namespace ApiIntro.Controllers
     [HttpPost]
     public IActionResult Post([FromBody] ProductCreateRequest request)
     {
+
+      var response = productCreateRequestHandler.Handle(request);
+
       // yeni açılan kaynağın URI'si ve oluşturulan kaynağın bilgileri döner
-      return Created("/api/v1/products/1", new ProductCreateResponse());
+      return Created($"/api/v1/products/{response.Id}", response);
     }
 
     // Status Code 204

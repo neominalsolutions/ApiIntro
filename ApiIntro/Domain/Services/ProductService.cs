@@ -3,8 +3,9 @@ using ApiIntro.Domain.Repositories;
 
 namespace ApiIntro.Domain.Services
 {
-  public class ProductService
+  public class ProductService: IProductService
   {
+    // EFProductRepository alt yapısı ile Program.cs dosyasında çalışacak.
     private readonly IProductRepository productRepository;
     public ProductService(IProductRepository productRepository)
     {
