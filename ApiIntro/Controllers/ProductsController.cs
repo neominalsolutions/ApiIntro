@@ -2,6 +2,8 @@
 using ApiIntro.Application.Products.RequestHandlers;
 using ApiIntro.Application.Products.Requests;
 using ApiIntro.Domain.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +11,7 @@ namespace ApiIntro.Controllers
 {
   [Route("api/v1/[controller]")]
   [ApiController]
+  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
   public class ProductsController : ControllerBase
   {
     private readonly ProductCreateRequestHandler productCreateRequestHandler;
@@ -52,7 +55,10 @@ namespace ApiIntro.Controllers
 
     // Status Code 201
     // POST: api/v1/Products -> Create a new product
+    // sadece post yetkisi admin rolüne verilmiş.
+    // Roles ="user,admin" şekilde tanımlarsak or gibi yani ya admin yada user yetkisi yeterli olur.
     [HttpPost]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles ="user,admin")]
     public IActionResult Post([FromBody] ProductCreateRequest request)
     {
 
