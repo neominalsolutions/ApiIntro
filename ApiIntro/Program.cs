@@ -101,6 +101,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
 });
 
+// Cors Settings- > React Client uygulamaya cors açma
+
+builder.Services.AddCors(options =>
+{
+  options.AddPolicy("Cors",
+      policyBuilder => policyBuilder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+});
 
 // custom middleware i DI konteynerýna ekleyelim
 builder.Services.AddTransient<CustomErrorMiddleware>();
@@ -116,6 +123,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("Cors");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
